@@ -1,0 +1,24 @@
+{
+  "name": "rss-news-feed",
+  "version": "1.0.1",
+  "description": "RSS news feed",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"work\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arbyman/project-lvl3-s464.git"
+  },
+  "keywords": [
+    "hexlet",
+    "study",
+    "step3"
+  ],
+  "author": "bardelorean",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arbyman/project-lvl3-s464/issues"
+  },
+  "homepage": "https://github.com/arbyman/project-lvl3-s464#readme"
+}
