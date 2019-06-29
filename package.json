@@ -2,9 +2,9 @@
   "name": "rss-news-feed",
   "version": "1.0.1",
   "description": "RSS news feed",
-  "main": "index.js",
+  "main": "",
   "scripts": {
-    "test": "echo \"work\""
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -15,6 +15,20 @@
     "study",
     "step3"
   ],
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.4.3",
+    "@babel/core": "^7.4.3",
+    "@babel/node": "^7.2.2",
+    "@babel/preset-env": "^7.4.3",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.15.3",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "jest": "^24.7.1"
+  },
   "author": "bardelorean",
   "license": "ISC",
   "bugs": {
