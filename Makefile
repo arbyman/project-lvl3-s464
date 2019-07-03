@@ -7,11 +7,8 @@ publish:
 lint:
 	npx eslint .
 
-test:
-	npm test
+dev:
+	npm run dev
 
-test-watch:
-	npm test -- --watch
-
-test-coverage:
-	npm test -- --coverage
+build:
+	npm run build
