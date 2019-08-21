@@ -23,6 +23,23 @@ const messages = {
   alertErrorLoading: $('<li class="list-group-item">Loading error!</li>'),
 };
 
+const makeModal = description => $(`<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+Read more
+</button>
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <div class="modal-body">${description}</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>`);
+
 const onChange = (event) => {
   const { value } = event.currentTarget;
   stateInput.url = value;
@@ -72,7 +89,8 @@ const onClick = (event) => {
       items.each((index, item) => {
         const titleNews = $(item).find('title').text();
         const linkNews = $(item).find('link').text();
-        model.feedNews.push({ titleNews, linkNews });
+        const descriptionNews = $(item).find('description').text();
+        model.feedNews.push({ titleNews, linkNews, descriptionNews });
       });
     })
     .catch(() => $('.subscribes').append(messages.alertErrorLoading));
@@ -84,8 +102,24 @@ const renderSubscribes = () => {
   });
 };
 const renderNews = () => {
-  model.feedNews.forEach(({ titleNews, linkNews }) => {
-    $('.feed-news').append(`<li class="list-group-item"><a href="${linkNews}">${titleNews}</a></li>`);
+  model.feedNews.forEach(({ titleNews, linkNews, descriptionNews }) => {
+    const id = Math.floor((Math.random() * 100) + 1);
+    $('.feed-news').append(`
+    <li class="list-group-item">
+      <a href="${linkNews}">${titleNews}</a>
+      <a href="#Modal-${id}" class="btn btn-primary" id="btn-${id}" data-toggle="modal">Read more</a>
+      <div class="modal fade" id="Modal-${id}" tabindex="-1" role="dialog" aria-labelledby="Label${id}" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <div class="modal-body">${descriptionNews}</div>
+          </div>
+        </div>
+      </div>
+    </li>`);
+    //$(`#btn-${id}`).on('click', () => $(`#Modal-${id}`).modal('show'));
   });
 };
 
