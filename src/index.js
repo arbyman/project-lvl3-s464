@@ -4,6 +4,7 @@ import { isURL } from 'validator';
 import { watch } from 'melanke-watchjs';
 import $ from 'jquery';
 import axios from 'axios';
+import path from 'path';
 
 const model = {
   subscribes: [],
@@ -22,23 +23,6 @@ const messages = {
   alertLoading: $('<li class="list-group-item">Loading...</li>'),
   alertErrorLoading: $('<li class="list-group-item">Loading error!</li>'),
 };
-
-const makeModal = description => $(`<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-Read more
-</button>
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-      <div class="modal-body">${description}</div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>`);
 
 const onChange = (event) => {
   const { value } = event.currentTarget;
@@ -103,23 +87,26 @@ const renderSubscribes = () => {
 };
 const renderNews = () => {
   model.feedNews.forEach(({ titleNews, linkNews, descriptionNews }) => {
-    const id = Math.floor((Math.random() * 100) + 1);
+    const id = path.basename(linkNews);
+    console.log(id);
     $('.feed-news').append(`
     <li class="list-group-item">
       <a href="${linkNews}">${titleNews}</a>
-      <a href="#Modal-${id}" class="btn btn-primary" id="btn-${id}" data-toggle="modal">Read more</a>
-      <div class="modal fade" id="Modal-${id}" tabindex="-1" role="dialog" aria-labelledby="Label${id}" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+      <button class="btn btn-primary float-right" data-toggle="modal" data-target="#Modal-${id}">Read more</button>
+      <div class="modal fade" id="Modal-${id}" tabindex="-1" role="dialog" aria-labelledby="Label-${id}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">  
           <div class="modal-content">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">${titleNews}</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
             <div class="modal-body">${descriptionNews}</div>
           </div>
         </div>
       </div>
     </li>`);
-    //$(`#btn-${id}`).on('click', () => $(`#Modal-${id}`).modal('show'));
   });
 };
 
