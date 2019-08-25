@@ -1,12 +1,11 @@
 {
   "name": "rss-news-feed",
-  "version": "1.0.1",
+  "version": "1.0.9",
   "description": "RSS news feed",
   "main": "index.js",
   "scripts": {
     "dev": "webpack-dev-server --mode development --open",
-    "build": "webpack --mode production",
-    "watch": "webpack --watch --mode development"
+    "build": "webpack --mode production"
   },
   "repository": {
     "type": "git",
@@ -15,7 +14,8 @@
   "keywords": [
     "hexlet",
     "study",
-    "step3"
+    "step3",
+    "rss-feed"
   ],
   "jest": {
     "testEnvironment": "node"
