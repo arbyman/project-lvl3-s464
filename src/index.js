@@ -27,7 +27,7 @@ const messages = {
 const onChange = (event) => {
   const { value } = event.currentTarget;
   stateInput.url = value;
-  stateInput.existUrl = !!model.subscribes.find(({ link }) => link === stateInput.url);
+  stateInput.existUrl = !!model.subscribes.find(({ url }) => url === stateInput.url);
   stateInput.validUrl = isURL(stateInput.url);
 };
 
@@ -65,16 +65,18 @@ const onClick = (event) => {
     .then((response) => {
       $(messages.alertLoading).remove();
       const res = $.parseXML(response.data);
-      const link = url;
       const title = $(res).find('channel title').filter(':first').text();
       const description = $(res).find('channel description').filter(':first').text();
-      model.subscribes.push({ title, description, link });
+      model.subscribes.push({ title, description, url });
       const items = $(res).find('channel item');
       items.each((index, item) => {
-        const titleNews = $(item).find('title').text();
         const linkNews = $(item).find('link').text();
+        const id = path.basename(linkNews);
+        const titleNews = $(item).find('title').text();
         const descriptionNews = $(item).find('description').text();
-        model.feedNews.push({ titleNews, linkNews, descriptionNews });
+        model.feedNews.push({
+          titleNews, linkNews, descriptionNews, id,
+        });
       });
     })
     .catch(() => $('.subscribes').append(messages.alertErrorLoading));
@@ -86,10 +88,13 @@ const renderSubscribes = () => {
   });
 };
 const renderNews = () => {
-  model.feedNews.forEach(({ titleNews, linkNews, descriptionNews }) => {
-    const id = path.basename(linkNews);
-    console.log(id);
-    $('.feed-news').append(`
+  model.feedNews.forEach(({
+    titleNews, linkNews, descriptionNews, id,
+  }) => {
+    if ($(`.feed-news #Modal-${id}`).length) {
+      return;
+    }
+    $('.feed-news').prepend(`
     <li class="list-group-item">
       <a href="${linkNews}">${titleNews}</a>
       <button class="btn btn-primary float-right" data-toggle="modal" data-target="#Modal-${id}">Read more</button>
@@ -114,3 +119,26 @@ watch(model, 'subscribes', renderSubscribes);
 watch(model, 'feedNews', renderNews);
 $('#inputRSS').on('input', onChange);
 $('.form-feed').submit(onClick);
+
+setInterval(() => {
+  model.subscribes.forEach(({ url }) => {
+    const proxy = 'https://cors-anywhere.herokuapp.com/';
+    axios.get(`${proxy}${url}`)
+      .then((response) => {
+        const res = $.parseXML(response.data);
+        const items = $(res).find('channel item');
+        items.each((index, item) => {
+          const linkNews = $(item).find('link').text();
+          const idNews = path.basename(linkNews);
+          const titleNews = $(item).find('title').text();
+          const descriptionNews = $(item).find('description').text();
+          if (model.feedNews.find(({ id }) => id !== idNews)) {
+            model.feedNews.push({
+              titleNews, linkNews, descriptionNews, id: idNews,
+            });
+          }
+        });
+      })
+      .catch(() => $('.subscribes').append(messages.alertErrorLoading));
+  });
+}, 5000);
