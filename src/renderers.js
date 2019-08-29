@@ -1,28 +1,53 @@
 import $ from 'jquery';
 
-const renderInput = ({ state, url }, { alertInvalidUrl }) => {
-  $('#inputRSS')[0].value = url;
-  $(alertInvalidUrl).remove();
-  $('#inputRSS').removeClass('border border-danger');
+const input = document.getElementById('inputRSS');
+const button = document.querySelector('.jumbotron button[type="submit"]');
+const subscribesList = document.querySelector('.subscribes');
+const alertError = document.createElement('div');
+alertError.classList.add('alert', 'alert-danger');
+
+const renderInput = ({
+  state, url, message, submitDisabled,
+}) => {
+  alertError.remove();
+  button.disabled = submitDisabled;
+  input.value = url;
   switch (state) {
     case 'invalid':
-      $('#inputRSS').addClass('border border-danger');
-      $('.form-group').append(alertInvalidUrl);
-      $('.form-feed .btn-primary').prop('disabled', true);
+      input.classList.add('border', 'border-danger');
+      alertError.textContent = message;
+      input.parentNode.append(alertError);
       break;
     case 'valid':
-      $('#inputRSS').removeClass('border border-danger');
-      $('.form-feed .btn-primary').prop('disabled', false);
+      input.classList.remove('border', 'border-danger');
       break;
     default:
-      $('.form-feed .btn-primary').prop('disabled', true);
+      input.classList.remove('border', 'border-danger');
   }
 };
-const renderSubscribes = ({ subscribes }) => {
-  $('.list-group-item').remove();
-  subscribes.forEach(({ title, description }) => {
-    $('.subscribes').append(`<li class="list-group-item"><h4>${title}</h4><p>Description: ${description}</p></li>`);
-  });
+
+const alertLoading = $('<li class="list-group-item"><h4>Loading...</h4></li>');
+const alertLoadingFailed = $('<li class="list-group-item"><h4>Loading failed!</h4></li>');
+const renderSubscribes = ({ subscribes, state }) => {
+  switch (state) {
+    case 'load':
+      $('.subscribes').append(alertLoading);
+      break;
+    case 'loadSuccess':
+      $(alertLoading).remove();
+      $('.list-group-item').remove();
+      subscribes.forEach(({ title, description }) => {
+        $('.subscribes').append(`<li class="list-group-item"><h4>${title}</h4><p>Description: ${description}</p></li>`);
+      });
+      break;
+    case 'loadFailed':
+      $(alertLoading).remove();
+      $(subscribesList).append(alertLoadingFailed);
+      break;
+    default:
+      $(alertLoading).remove();
+      $(alertLoadingFailed).remove();
+  }
 };
 const renderNews = ({ feedNews }) => {
   feedNews.forEach(({
