@@ -23,6 +23,7 @@ const renderInput = ({
       break;
     default:
       input.classList.remove('border', 'border-danger');
+      input.value = '';
   }
 };
 
@@ -30,7 +31,7 @@ const alertLoading = $('<li class="list-group-item"><h4>Loading...</h4></li>');
 const alertLoadingFailed = $('<li class="list-group-item"><h4>Loading failed!</h4></li>');
 const renderSubscribes = ({ subscribes, state }) => {
   switch (state) {
-    case 'load':
+    case 'loadNewChannel':
       $('.subscribes').append(alertLoading);
       break;
     case 'loadSuccess':
@@ -51,29 +52,38 @@ const renderSubscribes = ({ subscribes, state }) => {
 };
 const renderNews = ({ feedNews }) => {
   feedNews.forEach(({
-    titleNews, linkNews, descriptionNews, id,
+    titleNews, linkNews, descriptionNews, id, type,
   }) => {
-    if ($(`.feed-news #Modal-${id}`).length) {
-      return;
-    }
-    $('.feed-news').prepend(`
-    <li class="list-group-item">
-      <a href="${linkNews}">${titleNews}</a>
-      <button class="btn btn-primary float-right" data-toggle="modal" data-target="#Modal-${id}">Read more</button>
-      <div class="modal fade" id="Modal-${id}" tabindex="-1" role="dialog" aria-labelledby="Label-${id}" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">  
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLongTitle">${titleNews}</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
+    switch (type) {
+      case 'new':
+        $('.feed-news').prepend(`
+          <li class="list-group-item" id="news-${id}">
+            <a href="${linkNews}">
+              ${titleNews}
+              <span class="badge badge-success">New</span>
+            </a>
+            <button class="btn btn-primary float-right" data-toggle="modal" data-target="#Modal-${id}">Read more</button>
+            <div class="modal fade" id="Modal-${id}" tabindex="-1" role="dialog" aria-labelledby="Label-${id}" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">${titleNews}</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                  <div class="modal-body">${descriptionNews}</div>
+                </div>
+              </div>
             </div>
-            <div class="modal-body">${descriptionNews}</div>
-          </div>
-        </div>
-      </div>
-    </li>`);
+          </li>`);
+        break;
+      case 'old':
+        $(`#news-${id} .badge`).remove();
+        break;
+      default:
+        console.log('zhopa');
+    }
   });
 };
 export { renderInput, renderSubscribes, renderNews };

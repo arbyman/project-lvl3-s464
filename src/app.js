@@ -1,18 +1,11 @@
 import { isURL } from 'validator';
 import { watch } from 'melanke-watchjs';
-import $ from 'jquery';
 import axios from 'axios';
-import path from 'path';
 import { renderInput, renderNews, renderSubscribes } from './renderers';
 import parser from './parser';
 
 const proxy = 'https://cors-anywhere.herokuapp.com/';
 
-const messages = {
-  alertInvalidUrl: $('<div class="alert alert-danger">URL invalid or exist</div>'),
-  alertLoading: $('<li class="list-group-item">Loading...</li>'),
-  alertErrorLoading: $('<li class="list-group-item">Loading error!</li>'),
-};
 export default () => {
   const model = {
     state: '',
@@ -22,7 +15,7 @@ export default () => {
       url: '',
       state: 'empty',
       submitDisabled: true,
-      errorMessage: '',
+      message: '',
     },
   };
 
@@ -59,43 +52,51 @@ export default () => {
   };
 
   const updateNews = (link) => {
-    if (!model.subscribes.find(({ url }) => url === link)) {
-      model.state = 'load';
-    }
     axios.get(`${proxy}${link}`)
       .then(({ data }) => {
-        if (!model.subscribes.find(({ url }) => url === link)) {
+        if (model.state === 'loadNewChannel') {
           const newSubscribe = parser.getSubscribe(data);
           model.subscribes.push({ ...newSubscribe, url: link });
-          model.state = 'loadSuccess';
+          model.inputURL.state = 'empty';
+          model.inputURL.submitDisabled = true;
         }
         const news = parser.getNews(data);
+        if (model.feedNews.length) {
+          model.feedNews = model.feedNews.map(current => ({ ...current, type: 'old' }));
+        }
         news.forEach((currentNews) => {
           const { id: idNews } = currentNews;
           if (!model.feedNews.find(({ id }) => id === idNews)) {
-            model.feedNews.push(currentNews);
+            model.feedNews.push({ ...currentNews, type: 'new' });
           }
         });
-        setTimeout(() => updateNews(link), 5000);
+        model.state = 'loadSuccess';
+        setTimeout(() => {
+          model.state = 'updateNews';
+          updateNews(link);
+        }, 5000);
       })
       .catch(() => {
         model.state = 'loadFailed';
         model.inputURL.state = 'invalid';
         model.inputURL.message = 'Loading failed';
+        model.inputURL.submitDisabled = true;
       });
   };
 
   const onSubmit = (event) => {
     event.preventDefault();
     const { url } = model.inputURL;
+    model.state = 'loadNewChannel';
     updateNews(url);
   };
+
   watch(model, 'inputURL', () => renderInput(model.inputURL));
   watch(model, 'state', () => renderSubscribes(model));
   watch(model, 'feedNews', () => renderNews(model));
 
   const input = document.getElementById('inputRSS');
   const form = document.querySelector('.form-feed');
-  form.addEventListener('submit', onSubmit);
   input.addEventListener('input', onChange);
+  form.addEventListener('submit', onSubmit);
 };
