@@ -5,6 +5,7 @@ import { renderInput, renderNews, renderSubscribes } from './renderers';
 import parser from './parser';
 
 const proxy = 'https://cors-anywhere.herokuapp.com/';
+const time = 5000;
 
 export default () => {
   const model = {
@@ -60,7 +61,6 @@ export default () => {
           model.inputURL.state = 'empty';
           model.inputURL.submitDisabled = true;
         }
-        model.state = 'loadSuccess';
         const news = parser.getNews(data);
         news.forEach((currentNews) => {
           const { id: idNews } = currentNews;
@@ -68,15 +68,16 @@ export default () => {
             model.feedNews.push(currentNews);
           }
         });
+        model.state = 'loadSuccess';
         setTimeout(() => {
           model.state = 'updateNews';
           updateNews(link);
-        }, 5000);
+        }, time);
       })
       .catch(() => {
         model.state = 'loadFailed';
         model.inputURL.state = 'invalid';
-        model.inputURL.message = 'Loading failed';
+        model.inputURL.message = 'Loading failed!';
         model.inputURL.submitDisabled = true;
       });
   };
@@ -85,6 +86,9 @@ export default () => {
     event.preventDefault();
     const { url } = model.inputURL;
     model.state = 'loadNewChannel';
+    model.inputURL.state = 'loading';
+    model.inputURL.message = 'Loading...';
+    model.inputURL.submitDisabled = true;
     updateNews(url);
   };
 

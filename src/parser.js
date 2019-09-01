@@ -1,6 +1,18 @@
 import $ from 'jquery';
 import path from 'path';
 
+const subscribesId = new Set();
+const minId = 1;
+const maxId = 10000;
+
+const getSubscribeNewId = (min, max) => {
+  const id = Math.floor(Math.random() * (max - min)) + min;
+  if (subscribesId.has(id)) {
+    return getSubscribeNewId(minId, maxId);
+  }
+  return id;
+};
+
 const parser = new DOMParser();
 export default {
   getSubscribe: (xml) => {
@@ -10,7 +22,8 @@ export default {
     }
     const title = $(data).find('channel title').filter(':first').text();
     const description = $(data).find('channel description').filter(':first').text();
-    return { title, description };
+    const idSubscribe = getSubscribeNewId(minId, maxId);
+    return { title, description, id: idSubscribe };
   },
   getNews: (xml) => {
     const data = parser.parseFromString(xml, 'application/xml');
