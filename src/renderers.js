@@ -36,7 +36,7 @@ const renderSubscribes = ({ subscribes, state }) => {
       break;
     case 'loadSuccess':
       $(alertLoading).remove();
-      $('.list-group-item').remove();
+      $('.subscribes .list-group-item').remove();
       subscribes.forEach(({ title, description }) => {
         $('.subscribes').append(`<li class="list-group-item"><h4>${title}</h4><p>Description: ${description}</p></li>`);
       });
@@ -47,15 +47,18 @@ const renderSubscribes = ({ subscribes, state }) => {
       break;
     default:
       $(alertLoading).remove();
-      $(alertLoadingFailed).remove();
   }
 };
-const renderNews = ({ feedNews }) => {
+const renderNews = ({ state, feedNews }) => {
   feedNews.forEach(({
-    titleNews, linkNews, descriptionNews, id, type,
+    titleNews, linkNews, descriptionNews, id,
   }) => {
-    switch (type) {
-      case 'new':
+    switch (state) {
+      case 'loadSuccess':
+        if ($(`#news-${id}`).length) {
+          $(`#news-${id} .badge`).remove();
+          break;
+        }
         $('.feed-news').prepend(`
           <li class="list-group-item" id="news-${id}">
             <a href="${linkNews}">
@@ -78,11 +81,7 @@ const renderNews = ({ feedNews }) => {
             </div>
           </li>`);
         break;
-      case 'old':
-        $(`#news-${id} .badge`).remove();
-        break;
       default:
-        console.log('zhopa');
     }
   });
 };

@@ -60,17 +60,14 @@ export default () => {
           model.inputURL.state = 'empty';
           model.inputURL.submitDisabled = true;
         }
+        model.state = 'loadSuccess';
         const news = parser.getNews(data);
-        if (model.feedNews.length) {
-          model.feedNews = model.feedNews.map(current => ({ ...current, type: 'old' }));
-        }
         news.forEach((currentNews) => {
           const { id: idNews } = currentNews;
           if (!model.feedNews.find(({ id }) => id === idNews)) {
-            model.feedNews.push({ ...currentNews, type: 'new' });
+            model.feedNews.push(currentNews);
           }
         });
-        model.state = 'loadSuccess';
         setTimeout(() => {
           model.state = 'updateNews';
           updateNews(link);
@@ -93,7 +90,7 @@ export default () => {
 
   watch(model, 'inputURL', () => renderInput(model.inputURL));
   watch(model, 'state', () => renderSubscribes(model));
-  watch(model, 'feedNews', () => renderNews(model));
+  watch(model, 'state', () => renderNews(model));
 
   const input = document.getElementById('inputRSS');
   const form = document.querySelector('.form-feed');
