@@ -7,94 +7,99 @@ import parser from './parser';
 const proxy = 'https://cors-anywhere.herokuapp.com/';
 const time = 5000;
 
+const subscribesId = new Set();
+const minId = 1;
+const maxId = 10000;
+
+const getSubscribeNewId = (min, max) => {
+  const id = Math.floor(Math.random() * (max - min)) + min;
+  if (subscribesId.has(id)) {
+    return getSubscribeNewId(minId, maxId);
+  }
+  return id;
+};
+
 export default () => {
-  const model = {
+  const state = {
     state: '',
     subscribes: [],
     feedNews: [],
     inputURL: {
       url: '',
       state: 'empty',
-      submitDisabled: true,
       message: '',
     },
   };
 
-  const isExist = value => model.subscribes.find(({ url }) => url === value);
+  const isExist = value => state.subscribes.find(({ url }) => url === value);
   const onChange = (event) => {
     const { value } = event.currentTarget;
     if (value) {
-      model.inputURL.state = 'filled';
+      state.inputURL.state = 'filled';
     }
-    model.inputURL.url = value;
-    switch (model.inputURL.state) {
+    state.inputURL.url = value;
+    switch (state.inputURL.state) {
       case 'filled':
         if (!isURL(value)) {
-          model.inputURL.state = 'invalid';
-          model.inputURL.submitDisabled = true;
-          model.inputURL.message = 'URL invalid.';
+          state.inputURL.state = 'invalid';
+          state.inputURL.message = 'URL invalid.';
           break;
         }
         if (isExist(value)) {
-          model.inputURL.state = 'invalid';
-          model.inputURL.submitDisabled = true;
-          model.inputURL.message = 'URL already exists.';
+          state.inputURL.state = 'invalid';
+          state.inputURL.message = 'URL already exists.';
           break;
         }
-        model.inputURL.state = 'valid';
-        model.inputURL.submitDisabled = false;
-        model.inputURL.message = '';
+        state.inputURL.state = 'valid';
+        state.inputURL.message = '';
         break;
       default:
-        model.inputURL.state = 'empty';
-        model.inputURL.submitDisabled = true;
-        model.inputURL.message = '';
+        state.inputURL.state = 'empty';
+        state.inputURL.message = '';
     }
   };
 
-  const updateNews = (link) => {
+  const updatingNews = (link) => {
     axios.get(`${proxy}${link}`)
       .then(({ data }) => {
-        if (model.state === 'loadNewChannel') {
+        if (state.state === 'loadNewChannel') {
           const newSubscribe = parser.getSubscribe(data);
-          model.subscribes.push({ ...newSubscribe, url: link });
-          model.inputURL.state = 'empty';
-          model.inputURL.submitDisabled = true;
+          const id = getSubscribeNewId(minId, maxId);
+          state.subscribes.push({ ...newSubscribe, url: link, id });
+          state.inputURL.state = 'empty';
         }
         const news = parser.getNews(data);
         news.forEach((currentNews) => {
           const { id: idNews } = currentNews;
-          if (!model.feedNews.find(({ id }) => id === idNews)) {
-            model.feedNews.push(currentNews);
+          if (!state.feedNews.find(({ id }) => id === idNews)) {
+            state.feedNews.push(currentNews);
           }
         });
-        model.state = 'loadSuccess';
+        state.state = 'loadSuccess';
         setTimeout(() => {
-          model.state = 'updateNews';
-          updateNews(link);
+          state.state = 'updatingNews';
+          updatingNews(link);
         }, time);
       })
       .catch(() => {
-        model.state = 'loadFailed';
-        model.inputURL.state = 'invalid';
-        model.inputURL.message = 'Loading failed!';
-        model.inputURL.submitDisabled = true;
+        state.state = 'loadFailed';
+        state.inputURL.state = 'invalid';
+        state.inputURL.message = 'Loading failed!';
       });
   };
 
   const onSubmit = (event) => {
     event.preventDefault();
-    const { url } = model.inputURL;
-    model.state = 'loadNewChannel';
-    model.inputURL.state = 'loading';
-    model.inputURL.message = 'Loading...';
-    model.inputURL.submitDisabled = true;
-    updateNews(url);
+    const { url } = state.inputURL;
+    state.state = 'loadNewChannel';
+    state.inputURL.state = 'loading';
+    state.inputURL.message = 'Loading...';
+    updatingNews(url);
   };
 
-  watch(model, 'inputURL', () => renderInput(model.inputURL));
-  watch(model, 'state', () => renderSubscribes(model));
-  watch(model, 'state', () => renderNews(model));
+  watch(state, 'inputURL', () => renderInput(state.inputURL));
+  watch(state, 'state', () => renderSubscribes(state));
+  watch(state, 'state', () => renderNews(state));
 
   const input = document.getElementById('inputRSS');
   const form = document.querySelector('.form-feed');

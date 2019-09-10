@@ -8,30 +8,35 @@ const alertInfo = document.createElement('div');
 alertInfo.classList.add('alert', 'alert-info');
 
 const renderInput = ({
-  state, url, message, submitDisabled,
+  state, url, message,
 }) => {
   alertError.remove();
-  button.disabled = submitDisabled;
   input.value = url;
+  input.disabled = false;
   switch (state) {
     case 'invalid':
       input.classList.add('border', 'border-danger');
       alertInfo.remove();
       alertError.textContent = message;
       input.parentNode.append(alertError);
+      button.disabled = true;
       break;
     case 'valid':
       input.classList.remove('border', 'border-danger');
       alertInfo.remove();
+      button.disabled = false;
       break;
     case 'loading':
       alertInfo.textContent = message;
       input.parentNode.append(alertInfo);
+      button.disabled = true;
+      input.disabled = true;
       break;
     default:
       input.classList.remove('border', 'border-danger');
       alertInfo.remove();
       input.value = '';
+      button.disabled = true;
   }
 };
 
