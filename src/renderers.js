@@ -1,3 +1,35 @@
+import i18next from 'i18next';
+import Backend from 'i18next-chained-backend';
+import LocalStorageBackend from 'i18next-localstorage-backend';
+
+i18next
+  .init({
+    lng: 'en',
+    debug: true,
+    resources: {
+      en: {
+        translation: {
+          invalidURL: 'URL is invalid or already exists.',
+          loading: 'Loading...',
+          loadingError: 'loading failed!',
+          readMore: 'Read more',
+          description: 'Description: ',
+        },
+      },
+      ru: {
+        translation: {
+          invalidURL: 'URL неверен или уже существует.',
+          loading: 'Загрузка...',
+          loadingError: 'Загрузка прервана!',
+          readMore: 'Читать далее',
+          description: 'Описание: ',
+        },
+      },
+    },
+  }, (err, t) => {
+    console.log('lol');
+  });
+
 const input = document.getElementById('inputRSS');
 const button = document.querySelector('.jumbotron button[type="submit"]');
 const subscribesList = document.querySelector('.subscribes');
@@ -8,7 +40,7 @@ const alertInfo = document.createElement('div');
 alertInfo.classList.add('alert', 'alert-info');
 
 const renderInput = ({
-  state, url, message,
+  state, url,
 }) => {
   alertError.remove();
   input.value = url;
@@ -17,7 +49,7 @@ const renderInput = ({
     case 'invalid':
       input.classList.add('border', 'border-danger');
       alertInfo.remove();
-      alertError.textContent = message;
+      alertError.textContent = i18next.t('invalidURL');
       input.parentNode.append(alertError);
       button.disabled = true;
       break;
@@ -27,10 +59,17 @@ const renderInput = ({
       button.disabled = false;
       break;
     case 'loading':
-      alertInfo.textContent = message;
+      alertInfo.textContent = i18next.t('loading');
       input.parentNode.append(alertInfo);
       button.disabled = true;
       input.disabled = true;
+      break;
+    case 'loadingFail':
+      input.classList.add('border', 'border-danger');
+      alertInfo.remove();
+      alertError.textContent = i18next.t('loadingError');
+      input.parentNode.append(alertError);
+      button.disabled = true;
       break;
     default:
       input.classList.remove('border', 'border-danger');
@@ -40,29 +79,18 @@ const renderInput = ({
   }
 };
 
-const alertLoading = document.createElement('li');
-alertLoading.classList.add('list-group-item');
-alertLoading.innerHTML = '<h4>Loading...</h4>';
-
 const renderSubscribes = ({ subscribes, state }) => {
-  switch (state) {
-    case 'loadSuccess':
-      subscribes.forEach(({ title, description, id }) => {
-        if (document.getElementById(`subscribe-${id}`)) {
-          return;
-        }
-        const newSubscribe = document.createElement('li');
-        newSubscribe.classList.add('list-group-item');
-        newSubscribe.id = `subscribe-${id}`;
-        newSubscribe.innerHTML = `<h4>${title}</h4><p>Description: ${description}</p>`;
-        subscribesList.prepend(newSubscribe);
-      });
-      break;
-    case 'loadFailed':
-      alertLoading.remove();
-      break;
-    default:
-      alertLoading.remove();
+  if (state === 'loadSuccess') {
+    subscribes.forEach(({ title, description, id }) => {
+      if (document.getElementById(`subscribe-${id}`)) {
+        return;
+      }
+      const newSubscribe = document.createElement('li');
+      newSubscribe.classList.add('list-group-item');
+      newSubscribe.id = `subscribe-${id}`;
+      newSubscribe.innerHTML = `<h4>${title}</h4><p><span class="description">${i18next.t('description')}</span>${description}</p>`;
+      subscribesList.prepend(newSubscribe);
+    });
   }
 };
 const renderNews = ({ state, feedNews }) => {

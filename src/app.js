@@ -27,7 +27,6 @@ export default () => {
     inputURL: {
       url: '',
       state: 'empty',
-      message: '',
     },
   };
 
@@ -42,20 +41,16 @@ export default () => {
       case 'filled':
         if (!isURL(value)) {
           state.inputURL.state = 'invalid';
-          state.inputURL.message = 'URL invalid.';
           break;
         }
         if (isExist(value)) {
           state.inputURL.state = 'invalid';
-          state.inputURL.message = 'URL already exists.';
           break;
         }
         state.inputURL.state = 'valid';
-        state.inputURL.message = '';
         break;
       default:
         state.inputURL.state = 'empty';
-        state.inputURL.message = '';
     }
   };
 
@@ -83,8 +78,7 @@ export default () => {
       })
       .catch(() => {
         state.state = 'loadFailed';
-        state.inputURL.state = 'invalid';
-        state.inputURL.message = 'Loading failed!';
+        state.inputURL.state = 'loadingFail';
       });
   };
 
@@ -93,7 +87,6 @@ export default () => {
     const { url } = state.inputURL;
     state.state = 'loadNewChannel';
     state.inputURL.state = 'loading';
-    state.inputURL.message = 'Loading...';
     updatingNews(url);
   };
 
