@@ -1,6 +1,7 @@
 import { isURL } from 'validator';
 import { watch } from 'melanke-watchjs';
 import axios from 'axios';
+import path from 'path';
 import { renderInput, renderNews, renderSubscribes } from './renderers';
 import parser from './parser';
 
@@ -65,9 +66,10 @@ export default () => {
         }
         const news = parser.getNews(data);
         news.forEach((currentNews) => {
-          const { id: idNews } = currentNews;
+          const { linkNews } = currentNews;
+          const idNews = path.basename(linkNews);
           if (!state.feedNews.find(({ id }) => id === idNews)) {
-            state.feedNews.push(currentNews);
+            state.feedNews.push({ ...currentNews, id: idNews });
           }
         });
         state.state = 'loadSuccess';

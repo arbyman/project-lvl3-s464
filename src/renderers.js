@@ -1,6 +1,4 @@
 import i18next from 'i18next';
-import Backend from 'i18next-chained-backend';
-import LocalStorageBackend from 'i18next-localstorage-backend';
 
 i18next
   .init({
@@ -11,23 +9,14 @@ i18next
         translation: {
           invalidURL: 'URL is invalid or already exists.',
           loading: 'Loading...',
-          loadingError: 'loading failed!',
-          readMore: 'Read more',
-          description: 'Description: ',
-        },
-      },
-      ru: {
-        translation: {
-          invalidURL: 'URL неверен или уже существует.',
-          loading: 'Загрузка...',
-          loadingError: 'Загрузка прервана!',
-          readMore: 'Читать далее',
-          description: 'Описание: ',
+          loadingError: 'Loading failed!',
         },
       },
     },
-  }, (err, t) => {
-    console.log('lol');
+  }, (err) => {
+    if (err) {
+      throw new Error('Error translation.');
+    }
   });
 
 const input = document.getElementById('inputRSS');
@@ -88,7 +77,7 @@ const renderSubscribes = ({ subscribes, state }) => {
       const newSubscribe = document.createElement('li');
       newSubscribe.classList.add('list-group-item');
       newSubscribe.id = `subscribe-${id}`;
-      newSubscribe.innerHTML = `<h4>${title}</h4><p><span class="description">${i18next.t('description')}</span>${description}</p>`;
+      newSubscribe.innerHTML = `<h4>${title}</h4><p>Description: ${description}</p>`;
       subscribesList.prepend(newSubscribe);
     });
   }

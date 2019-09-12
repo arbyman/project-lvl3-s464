@@ -1,5 +1,3 @@
-import path from 'path';
-
 const parser = new DOMParser();
 export default {
   getSubscribe: (xml) => {
@@ -19,12 +17,9 @@ export default {
     const items = Array.from(data.querySelectorAll('channel item'));
     return items.map((item) => {
       const linkNews = item.querySelector('link').textContent;
-      const id = path.basename(linkNews);
       const titleNews = item.querySelector('title').textContent;
       const descriptionNews = item.querySelector('description').textContent;
-      return {
-        titleNews, linkNews, descriptionNews, id,
-      };
+      return { titleNews, linkNews, descriptionNews };
     });
   },
 };
