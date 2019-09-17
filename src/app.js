@@ -59,12 +59,13 @@ export default () => {
     axios.get(`${proxy}${link}`)
       .then(({ data }) => {
         if (state.state === 'loadNewChannel') {
-          const newSubscribe = parser.getSubscribe(data);
+          const { channel: newSubscribe } = parser(data);
           const id = getSubscribeNewId(minId, maxId);
           state.subscribes.push({ ...newSubscribe, url: link, id });
           state.inputURL.state = 'empty';
+          state.inputURL.url = '';
         }
-        const news = parser.getNews(data);
+        const { news } = parser(data);
         news.forEach((currentNews) => {
           const { linkNews } = currentNews;
           const idNews = path.basename(linkNews);

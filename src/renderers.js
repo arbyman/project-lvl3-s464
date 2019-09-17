@@ -1,24 +1,5 @@
 import i18next from 'i18next';
 
-i18next
-  .init({
-    lng: 'en',
-    debug: true,
-    resources: {
-      en: {
-        translation: {
-          invalidURL: 'URL is invalid or already exists.',
-          loading: 'Loading...',
-          loadingError: 'Loading failed!',
-        },
-      },
-    },
-  }, (err) => {
-    if (err) {
-      throw new Error('Error translation.');
-    }
-  });
-
 const input = document.getElementById('inputRSS');
 const button = document.querySelector('.jumbotron button[type="submit"]');
 const subscribesList = document.querySelector('.subscribes');
@@ -69,18 +50,19 @@ const renderInput = ({
 };
 
 const renderSubscribes = ({ subscribes, state }) => {
-  if (state === 'loadSuccess') {
-    subscribes.forEach(({ title, description, id }) => {
-      if (document.getElementById(`subscribe-${id}`)) {
-        return;
-      }
-      const newSubscribe = document.createElement('li');
-      newSubscribe.classList.add('list-group-item');
-      newSubscribe.id = `subscribe-${id}`;
-      newSubscribe.innerHTML = `<h4>${title}</h4><p>Description: ${description}</p>`;
-      subscribesList.prepend(newSubscribe);
-    });
+  if (state !== 'loadSuccess') {
+    return;
   }
+  subscribes.forEach(({ title, description, id }) => {
+    if (document.getElementById(`subscribe-${id}`)) {
+      return;
+    }
+    const newSubscribe = document.createElement('li');
+    newSubscribe.classList.add('list-group-item');
+    newSubscribe.id = `subscribe-${id}`;
+    newSubscribe.innerHTML = `<h4>${title}</h4><p>Description: ${description}</p>`;
+    subscribesList.prepend(newSubscribe);
+  });
 };
 const renderNews = ({ state, feedNews }) => {
   feedNews.forEach(({
