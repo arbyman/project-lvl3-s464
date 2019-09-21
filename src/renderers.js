@@ -1,14 +1,10 @@
 import i18next from 'i18next';
 
-const alertError = document.createElement('div');
-alertError.classList.add('alert', 'alert-danger');
-const alertInfo = document.createElement('div');
-alertInfo.classList.add('alert', 'alert-info');
-
-const renderInput = ({
-  state, url,
-}) => {
-  alertError.remove();
+const renderInput = ({ state, url }) => {
+  const alertError = document.querySelector('.form-feed .alert-danger');
+  const alertInfo = document.querySelector('.form-feed .alert-info');
+  alertError.classList.add('d-none');
+  alertInfo.classList.add('d-none');
   const input = document.getElementById('inputRSS');
   const button = document.querySelector('.jumbotron button[type="submit"]');
   input.value = url;
@@ -16,32 +12,28 @@ const renderInput = ({
   switch (state) {
     case 'invalid':
       input.classList.add('border', 'border-danger');
-      alertInfo.remove();
       alertError.textContent = i18next.t('invalidURL');
-      input.parentNode.append(alertError);
+      alertError.classList.remove('d-none');
       button.disabled = true;
       break;
     case 'valid':
       input.classList.remove('border', 'border-danger');
-      alertInfo.remove();
       button.disabled = false;
       break;
     case 'loading':
       alertInfo.textContent = i18next.t('loading');
-      input.parentNode.append(alertInfo);
+      alertInfo.classList.remove('d-none');
       button.disabled = true;
       input.disabled = true;
       break;
     case 'loadingFail':
       input.classList.add('border', 'border-danger');
-      alertInfo.remove();
       alertError.textContent = i18next.t('loadingError');
-      input.parentNode.append(alertError);
+      alertError.classList.remove('d-none');
       button.disabled = true;
       break;
     default:
       input.classList.remove('border', 'border-danger');
-      alertInfo.remove();
       input.value = '';
       button.disabled = true;
   }
