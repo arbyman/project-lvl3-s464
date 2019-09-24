@@ -2,27 +2,16 @@ import { isURL } from 'validator';
 import { watch } from 'melanke-watchjs';
 import axios from 'axios';
 import path from 'path';
+import initMessagesLanguage from './initMessagesLanguage';
 import { renderInput, renderNews, renderSubscribes } from './renderers';
 import parser from './parser';
 
 const proxy = 'https://cors-anywhere.herokuapp.com/';
 const time = 5000;
 
-const subscribesId = new Set();
-const minId = 1;
-const maxId = 10000;
-
-const getSubscribeNewId = (min, max) => {
-  const id = Math.floor(Math.random() * (max - min)) + min;
-  if (subscribesId.has(id)) {
-    return getSubscribeNewId(minId, maxId);
-  }
-  return id;
-};
-
 export default () => {
   const state = {
-    state: '',
+    stateLoadingNews: 'pending',
     subscribes: [],
     feedNews: [],
     inputURL: {
@@ -30,6 +19,8 @@ export default () => {
       state: 'empty',
     },
   };
+
+  initMessagesLanguage();
 
   const isExist = value => state.subscribes.find(({ url }) => url === value);
   const onChange = (event) => {
@@ -56,11 +47,10 @@ export default () => {
       .then(({ data }) => {
         const { subscribes: publishedSubscibes } = state;
         state.subscribes = publishedSubscibes.map(currentSubscribe => ({ ...currentSubscribe, status: 'published' }));
-        if (state.state === 'loadNewChannel') {
+        if (state.stateLoadingNews === 'loadNewChannel') {
           const { channel: newSubscribe } = parser(data);
-          const id = getSubscribeNewId(minId, maxId);
           state.subscribes.push({
-            ...newSubscribe, url: link, id, status: 'unpublished',
+            ...newSubscribe, url: link, status: 'unpublished',
           });
           state.inputURL.state = 'empty';
           state.inputURL.url = '';
@@ -75,14 +65,14 @@ export default () => {
             state.feedNews.push({ ...currentNews, id: idNews, status: 'unpublished' });
           }
         });
-        state.state = 'loadSuccess';
+        state.stateLoadingNews = 'loadSuccess';
         setTimeout(() => {
-          state.state = 'updatingNews';
+          state.stateLoadingNews = 'updatingNews';
           updatingNews(link);
         }, time);
       })
       .catch(() => {
-        state.state = 'loadFailed';
+        state.stateLoadingNews = 'loadFailed';
         state.inputURL.state = 'loadingFail';
       });
   };
@@ -90,14 +80,14 @@ export default () => {
   const onSubmit = (event) => {
     event.preventDefault();
     const { url } = state.inputURL;
-    state.state = 'loadNewChannel';
+    state.stateLoadingNews = 'loadNewChannel';
     state.inputURL.state = 'loading';
     updatingNews(url);
   };
 
   watch(state, 'inputURL', () => renderInput(state.inputURL));
-  watch(state, 'state', () => renderSubscribes(state));
-  watch(state, 'state', () => renderNews(state));
+  watch(state, 'stateLoadingNews', () => renderSubscribes(state));
+  watch(state, 'stateLoadingNews', () => renderNews(state));
 
   const input = document.getElementById('inputRSS');
   const form = document.querySelector('.form-feed');

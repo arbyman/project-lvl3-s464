@@ -39,27 +39,24 @@ const renderInput = ({ state, url }) => {
   }
 };
 
-const renderSubscribes = ({ subscribes, state }) => {
-  if (state !== 'loadSuccess') {
+const renderSubscribes = ({ subscribes, stateLoadingNews }) => {
+  if (stateLoadingNews !== 'loadSuccess') {
     return;
   }
   const subscribesList = document.querySelector('.subscribes');
-  subscribes.forEach(({
-    title, description, id, status,
-  }) => {
+  subscribes.forEach(({ title, description, status }) => {
     if (status !== 'unpublished') {
       return;
     }
     const newSubscribe = document.createElement('li');
     newSubscribe.classList.add('list-group-item');
-    newSubscribe.id = `subscribe-${id}`;
     newSubscribe.innerHTML = `<h4>${title}</h4><p>Description: ${description}</p>`;
     subscribesList.prepend(newSubscribe);
   });
 };
 
-const renderNews = ({ state, feedNews }) => {
-  if (state !== 'loadSuccess') {
+const renderNews = ({ stateLoadingNews, feedNews }) => {
+  if (stateLoadingNews !== 'loadSuccess') {
     return;
   }
   const time = 5000;
