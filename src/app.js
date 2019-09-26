@@ -42,39 +42,38 @@ export default () => {
     }
   };
 
-  const updatingNews = (link) => {
-    axios.get(`${proxy}${link}`)
-      .then(({ data }) => {
-        const { subscribes: publishedSubscibes } = state;
-        state.subscribes = publishedSubscibes.map(currentSubscribe => ({ ...currentSubscribe, status: 'published' }));
-        if (state.stateLoadingNews === 'loadNewChannel') {
-          const { channel: newSubscribe } = parser(data);
-          state.subscribes.push({
-            ...newSubscribe, url: link, status: 'unpublished',
-          });
-          state.inputURL.state = 'empty';
-          state.inputURL.url = '';
-        }
-        const { feedNews: publishedNews } = state;
-        state.feedNews = publishedNews.map(currentNews => ({ ...currentNews, status: 'published' }));
-        const { news } = parser(data);
-        news.forEach((currentNews) => {
-          const { linkNews } = currentNews;
-          const idNews = path.basename(linkNews);
-          if (!state.feedNews.find(({ id }) => id === idNews)) {
-            state.feedNews.push({ ...currentNews, id: idNews, status: 'unpublished' });
-          }
+  const updatingNews = async (link) => {
+    try {
+      const { data } = await axios.get(`${proxy}${link}`);
+      const { subscribes: publishedSubscibes } = state;
+      state.subscribes = publishedSubscibes.map(currentSubscribe => ({ ...currentSubscribe, status: 'published' }));
+      if (state.stateLoadingNews === 'loadNewChannel') {
+        const { channel: newSubscribe } = parser(data);
+        state.subscribes.push({
+          ...newSubscribe, url: link, status: 'unpublished',
         });
-        state.stateLoadingNews = 'loadSuccess';
-        setTimeout(() => {
-          state.stateLoadingNews = 'updatingNews';
-          updatingNews(link);
-        }, time);
-      })
-      .catch(() => {
-        state.stateLoadingNews = 'loadFailed';
-        state.inputURL.state = 'loadingFail';
+        state.inputURL.state = 'empty';
+        state.inputURL.url = '';
+      }
+      const { feedNews: publishedNews } = state;
+      state.feedNews = publishedNews.map(currentNews => ({ ...currentNews, status: 'published' }));
+      const { news } = parser(data);
+      news.forEach((currentNews) => {
+        const { linkNews } = currentNews;
+        const idNews = path.basename(linkNews);
+        if (!state.feedNews.find(({ id }) => id === idNews)) {
+          state.feedNews.push({ ...currentNews, id: idNews, status: 'unpublished' });
+        }
       });
+      state.stateLoadingNews = 'loadSuccess';
+      setTimeout(() => {
+        state.stateLoadingNews = 'updatingNews';
+        updatingNews(link);
+      }, time);
+    } catch {
+      state.stateLoadingNews = 'loadFailed';
+      state.inputURL.state = 'loadingFail';
+    }
   };
 
   const onSubmit = (event) => {
